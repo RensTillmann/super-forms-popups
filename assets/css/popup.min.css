@@ -3,6 +3,7 @@
 	opacity: 0;
 	z-index: 2;
 	width: 700px;
+	max-width: 90%;
 	height: auto;
 	display: none;
 	z-index: 99990;
@@ -26,6 +27,7 @@
 	text-align: center;
 	font-size: 23px;
 	padding: 20px 20px 20px 20px;
+	overflow: auto;
 }
 .super-popup > .super-popup-close {
 	width:30px;

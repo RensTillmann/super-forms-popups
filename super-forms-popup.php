@@ -149,10 +149,15 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                 
                 // Filters since 1.0.0
                 add_filter( 'super_form_settings_filter', array( $this, 'remove_preloader' ), 50, 2 ); 
+                add_filter( 'super_common_js_dynamic_functions_filter', array( $this, 'add_dynamic_function' ), 100, 2 );
                 
                 // Actions since 1.0.0
                 add_action( 'super_after_enqueue_element_scripts_action', array( $this, 'load_scripts' ) );
                 add_action( 'super_form_before_do_shortcode_filter', array( $this, 'add_form_inside_popup_wrapper'  ), 50, 2 );
+
+
+
+
 
             }
             if ( $this->is_request( 'admin' ) ) {
@@ -171,6 +176,20 @@ if( !class_exists( 'SUPER_Popup' ) ) :
 
             }
         } 
+
+
+        /**
+         * Hook into stylesheets of the form and add styles for the calculator element
+         *
+         *  @since      1.0.0
+        */
+        public static function add_dynamic_function( $functions ) {
+            
+            $functions['after_responsive_form_hook'][] = array(
+                'name' => 'init_responsive_popup'
+            );
+            return $functions;
+        }
 
 
         /**
@@ -498,9 +517,9 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'desc' => __( 'Stick to top, right, bottom or left', 'super-forms' ),
                         'filter'=>true,
                         'type'=>'select',
-                        'default' => SUPER_Settings::get_value( 0, 'popup_sticky', $settings['settings'], 'default' ),
+                        'default' => SUPER_Settings::get_value( 0, 'popup_sticky', $settings['settings'], 'center' ),
                         'values'=>array(
-                            'default' => __( 'default', 'super-forms' ),
+                            'center' => __( 'Disabled: center popup (default)', 'super-forms' ),
                             'top' => __( 'Top', 'super-forms' ),
                             'right' => __( 'Right', 'super-forms' ),
                             'bottom' => __( 'Bottom', 'super-forms' ),
