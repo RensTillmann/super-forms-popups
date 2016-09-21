@@ -16,7 +16,7 @@
 */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+    exit; // Exit if accessed directly
 }
 
 if( !class_exists( 'SUPER_Popup' ) ) :
@@ -26,7 +26,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
      * Main SUPER_Popup Class
      *
      * @class SUPER_Popup
-     * @version	1.0.0
+     * @version 1.0.0
      */
     final class SUPER_Popup {
     
@@ -34,7 +34,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
         /**
          * @var string
          *
-         *	@since		1.0.0
+         *  @since      1.0.0
         */
         public $version = '1.0.0';
 
@@ -42,7 +42,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
         /**
          * @var SUPER_Popup The single instance of the class
          *
-         *	@since		1.0.0
+         *  @since      1.0.0
         */
         protected static $_instance = null;
 
@@ -52,7 +52,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          *
          * @var array
          *
-         *	@since		1.0.0
+         *  @since      1.0.0
         */
         private static $scripts = array();
         
@@ -62,7 +62,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          *
          * @var array
          *
-         *	@since		1.0.0
+         *  @since      1.0.0
         */
         private static $wp_localize_scripts = array();
         
@@ -76,7 +76,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          * @see SUPER_Popup()
          * @return SUPER_Popup - Main instance
          *
-         *	@since		1.0.0
+         *  @since      1.0.0
         */
         public static function instance() {
             if(is_null( self::$_instance)){
@@ -89,7 +89,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
         /**
          * SUPER_Popup Constructor.
          *
-         *	@since		1.0.0
+         *  @since      1.0.0
         */
         public function __construct(){
             $this->init_hooks();
@@ -103,7 +103,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          * @param  string $name
          * @param  string|bool $value
          *
-         *	@since	1.0.0
+         *  @since  1.0.0
         */
         private function define($name, $value){
             if(!defined($name)){
@@ -118,7 +118,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          * string $type ajax, frontend or admin
          * @return bool
          *
-         *	@since		1.0.0
+         *  @since      1.0.0
         */
         private function is_request($type){
             switch ($type){
@@ -137,7 +137,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
         /**
          * Hook into actions and filters
          *
-         *	@since		1.0.0
+         *  @since      1.0.0
         */
         private function init_hooks() {
             
@@ -150,14 +150,10 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                 // Filters since 1.0.0
                 add_filter( 'super_form_settings_filter', array( $this, 'remove_preloader' ), 50, 2 ); 
                 add_filter( 'super_common_js_dynamic_functions_filter', array( $this, 'add_dynamic_function' ), 100, 2 );
-                
+
                 // Actions since 1.0.0
                 add_action( 'super_after_enqueue_element_scripts_action', array( $this, 'load_scripts' ) );
                 add_action( 'super_form_before_do_shortcode_filter', array( $this, 'add_form_inside_popup_wrapper'  ), 50, 2 );
-
-
-
-
 
             }
             if ( $this->is_request( 'admin' ) ) {
@@ -214,19 +210,21 @@ if( !class_exists( 'SUPER_Popup' ) ) :
             if( (isset($data["settings"]['popup_enabled'])) && ($data["settings"]['popup_enabled']=='true') ) {
                 $form_html = $result;
                 $result = '';
-                $super_popup_settings = $this->form_configuration_data($data["settings"]); 
-                $result .= '<script type="text/javascript">';
-                $result .= 'jQuery(document).ready(function(){';
-                $result .= 'var super_popup_settings = {' . $super_popup_settings . '};';
-                $result .= 'jQuery("#super-popup-' . $data["id"] . '").SUPER_Popup(super_popup_settings);';
-                $result .= '});';
-                $result .= '</script>';
+                $result .= '<style type="text/css">';
+                $result .= '.super-popup-' . $data["id"] . ' > * {';
+                    $result .= 'visibility:hidden;';
+                $result .= '}';
+                $result .= '.super-popup .super-form.preload-disabled > * {';
+                    $result .= 'visibility:hidden;';
+                $result .= '}';
+                $result .= '</style>';
                 $result .= '<div class="super-popup-wrapper">';
-                    $result .= '<div id="super-popup-' . $data["id"] . '" class="super-popup">';
+                    $result .= '<div class="super-popup-' . $data["id"] . ' super-popup">';
                         $result .= '<span class="super-popup-close"></span>';
                         $result .= '<div class="super-popup-content">';
                             $result .= $form_html;
                         $result .= '</div>';
+                        $result .= '<textarea name="super-popup-settings">' . $this->form_configuration_data($data["settings"]) . '</textarea>';
                     $result .= '</div>';
                 $result .= '</div>';
             }
@@ -255,16 +253,16 @@ if( !class_exists( 'SUPER_Popup' ) ) :
         */
         public function form_configuration_data( $settings ) {
             $popup_settings = array_intersect_key($settings, array_flip(preg_grep('/^popup_/', array_keys($settings))));
-            $settings = array();
             foreach ( $popup_settings as $k => $v ) {
-                if( $k=='popup_background_image' ) {
+                $old_k = $k;
+                $k = str_replace( 'popup_', '', $k );
+                if( $k=='background_image' ) {
                     $v = ((trim($v) != '' && intval($v) > 0) ? wp_get_attachment_url(absint($v)) : '');
-                    $settings[] = $k.":'".$v."'";
-                }else{
-                    $settings[] = $k.":'".$v."'";
                 }
+                unset($popup_settings[$old_k]);
+                $popup_settings[$k] = $v;
             }
-            return implode( ',', $settings );
+            return json_encode($popup_settings);
         }
 
 
@@ -396,7 +394,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                     ),
                     'popup_from' => array(
                         'name' => __( 'From date', 'super-forms' ),
-                        'desc' => __( 'From date (Y-m-d): Display the popup within specific date range', 'super-forms' ),
+                        'desc' => __( 'From date (yyyy-mm-dd): Display the popup within specific date range', 'super-forms' ),
                         'default' => SUPER_Settings::get_value( 0, 'popup_from', $settings['settings'], date('Y-m-d') ),
                         'parent' => 'popup_enable_schedule',
                         'filter_value' => 'true',
@@ -404,7 +402,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                     ), 
                     'popup_till' => array(
                         'name' => __( 'Till date', 'super-forms' ),
-                        'desc' => __( 'Till date (Y-m-d): Display the popup within specific date range', 'super-forms' ),
+                        'desc' => __( 'Till date (yyyy-mm-dd): Display the popup within specific date range', 'super-forms' ),
                         'default' => SUPER_Settings::get_value( 0, 'popup_till', $settings['settings'], date('Y-m-d') ),
                         'parent' => 'popup_enable_schedule',
                         'filter_value' => 'true',
@@ -473,6 +471,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'parent' => 'popup_enabled',
                         'filter_value' => 'true',
                     ),
+
                     'popup_close_button' => array(
                         'desc' => __( 'Close button (X) on top right corner of the popup', 'super-forms' ),
                         'default' => SUPER_Settings::get_value( 0, 'popup_close_button', $settings['settings'], 'true' ),
@@ -484,6 +483,24 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'parent' => 'popup_enabled',
                         'filter_value' => 'true',
                     ),
+                    'popup_close_button_bg_color' => array(
+                        'name' => __( 'Close button background color', 'super-forms' ),
+                        'type'=>'color',  
+                        'default' => SUPER_Settings::get_value( 0, 'popup_close_button_color', $settings['settings'], '#00bc65' ),
+                        'filter'=>true,
+                        'parent' => 'popup_enabled',
+                        'filter_value' => 'true',  
+                    ),
+                    'popup_close_button_icon_color' => array(
+                        'name' => __( 'Close button icon color', 'super-forms' ),
+                        'type'=>'color',  
+                        'default' => SUPER_Settings::get_value( 0, 'popup_close_button_font_color', $settings['settings'], '#fff' ),
+                        'filter'=>true,
+                        'parent' => 'popup_enabled',
+                        'filter_value' => 'true',  
+                    ),
+
+
                     'popup_slide' => array(
                         'name' => __( 'Popup slide in', 'super-forms' ),
                         'desc' => __( 'Slide in: From Top, Right, Bottom or Left', 'super-forms' ),
@@ -517,13 +534,25 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'desc' => __( 'Stick to top, right, bottom or left', 'super-forms' ),
                         'filter'=>true,
                         'type'=>'select',
-                        'default' => SUPER_Settings::get_value( 0, 'popup_sticky', $settings['settings'], 'center' ),
+                        'default' => SUPER_Settings::get_value( 0, 'popup_sticky', $settings['settings'], 'default' ),
                         'values'=>array(
-                            'center' => __( 'Disabled: center popup (default)', 'super-forms' ),
+                            'default' => __( 'default', 'super-forms' ),
                             'top' => __( 'Top', 'super-forms' ),
                             'right' => __( 'Right', 'super-forms' ),
                             'bottom' => __( 'Bottom', 'super-forms' ),
                             'left' => __( 'Left', 'super-forms' ),
+                        ),
+                        'parent' => 'popup_enabled',
+                        'filter_value' => 'true',
+                    ),
+
+
+                    'popup_enable_borders' => array(
+                        'default' => SUPER_Settings::get_value( 0, 'popup_enable_borders', $settings['settings'], '' ),
+                        'type' => 'checkbox',
+                        'filter'=>true,
+                        'values' => array(
+                            'true' => __( 'Enable Popup Border', 'super-forms' ),
                         ),
                         'parent' => 'popup_enabled',
                         'filter_value' => 'true',
@@ -536,7 +565,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'max'=>10,
                         'steps'=>1,
                         'filter'=>true,
-                        'parent' => 'popup_enabled',
+                        'parent' => 'popup_enable_borders',
                         'filter_value' => 'true',
                     ),
                     'popup_border_color' => array(
@@ -544,7 +573,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'type'=>'color',  
                         'default' => SUPER_Settings::get_value( 0, 'popup_border_color', $settings['settings'], '#00bc65' ),
                         'filter'=>true,
-                        'parent' => 'popup_enabled',
+                        'parent' => 'popup_enable_borders',
                         'filter_value' => 'true',  
                     ),
                     'popup_border_radius_top_left' => array(
@@ -555,7 +584,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'min'=>0,
                         'max'=>200,
                         'steps'=>1,
-                        'parent' => 'popup_enabled',
+                        'parent' => 'popup_enable_borders',
                         'filter_value' => 'true',
                     ),
                     'popup_border_radius_top_right' => array(
@@ -566,7 +595,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'max'=>200,
                         'filter'=>true,
                         'steps'=>1,
-                        'parent' => 'popup_enabled',
+                        'parent' => 'popup_enable_borders',
                         'filter_value' => 'true',
                     ),
                     'popup_border_radius_bottom_left' => array(
@@ -577,7 +606,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'max'=>200,
                         'steps'=>1,
                         'filter'=>true,
-                        'parent' => 'popup_enabled',
+                        'parent' => 'popup_enable_borders',
                         'filter_value' => 'true',
                     ),
                     'popup_border_radius_bottom_right' => array(
@@ -588,6 +617,17 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'max'=>200,
                         'steps'=>1,
                         'filter'=>true,
+                        'parent' => 'popup_enable_borders',
+                        'filter_value' => 'true',
+                    ),
+
+                    'popup_enable_shadows' => array(
+                        'default' => SUPER_Settings::get_value( 0, 'popup_enable_shadows', $settings['settings'], '' ),
+                        'type' => 'checkbox',
+                        'filter'=>true,
+                        'values' => array(
+                            'true' => __( 'Enable Popup Shadows', 'super-forms' ),
+                        ),
                         'parent' => 'popup_enabled',
                         'filter_value' => 'true',
                     ),
@@ -599,7 +639,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'max'=>200,
                         'steps'=>1,
                         'filter'=>true,
-                        'parent' => 'popup_enabled',
+                        'parent' => 'popup_enable_shadows',
                         'filter_value' => 'true',
                     ),
                     'popup_shadow_vertical_length' => array(
@@ -610,7 +650,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'max'=>200,
                         'steps'=>1,
                         'filter'=>true,
-                        'parent' => 'popup_enabled',
+                        'parent' => 'popup_enable_shadows',
                         'filter_value' => 'true',
                     ),
                     'popup_blur_radius' => array(
@@ -621,7 +661,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'max'=>300,
                         'steps'=>1,
                         'filter'=>true,
-                        'parent' => 'popup_enabled',
+                        'parent' => 'popup_enable_shadows',
                         'filter_value' => 'true',
                     ),
                     'popup_spread_radius' => array(
@@ -632,7 +672,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'max'=>200,
                         'steps'=>1,
                         'filter'=>true,
-                        'parent' => 'popup_enabled',
+                        'parent' => 'popup_enable_shadows',
                         'filter_value' => 'true',
                     ),
                     'popup_shadow_color' => array(
@@ -640,7 +680,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'type'=>'color',  
                         'default' => SUPER_Settings::get_value( 0, 'popup_shadow_color', $settings['settings'], '#00bc65' ),
                         'filter'=>true,
-                        'parent' => 'popup_enabled',
+                        'parent' => 'popup_enable_shadows',
                         'filter_value' => 'true',
                     ),
                     'popup_shadow_opacity' => array(
@@ -651,7 +691,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'max'=>1,
                         'steps'=>0.05,
                         'filter'=>true,
-                        'parent' => 'popup_enabled',
+                        'parent' => 'popup_enable_shadows',
                         'filter_value' => 'true',
                     ),
                  ), 
