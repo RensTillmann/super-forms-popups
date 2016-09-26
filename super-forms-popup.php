@@ -144,6 +144,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
             // Filters since 1.0.0
 
             // Actions since 1.0.0
+            add_shortcode( 'super-popup', array( $this, 'popup_shortcode_func' ) );
 
             if ( $this->is_request( 'frontend' ) ) {
                 
@@ -151,15 +152,20 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                 add_filter( 'super_form_settings_filter', array( $this, 'remove_preloader' ), 50, 2 ); 
                 add_filter( 'super_common_js_dynamic_functions_filter', array( $this, 'add_dynamic_function' ), 100, 2 );
 
+                add_filter( 'super_form_styles_filter', array( $this, 'add_popup_styles' ), 10, 2 );
+
+
                 // Actions since 1.0.0
                 add_action( 'super_after_enqueue_element_scripts_action', array( $this, 'load_scripts' ) );
                 add_action( 'super_form_before_do_shortcode_filter', array( $this, 'add_form_inside_popup_wrapper'  ), 50, 2 );
+                
 
             }
             if ( $this->is_request( 'admin' ) ) {
                
                 // Filters since 1.0.0 
                 add_filter( 'super_settings_after_export_import_filter', array( $this, 'register_popup_settigs' ), 50, 2 ); 
+                add_filter( 'super_form_styles_filter', array( $this, 'add_popup_styles' ), 10, 2 );
                 
                 // Actions since 1.0.0
 
@@ -172,6 +178,16 @@ if( !class_exists( 'SUPER_Popup' ) ) :
 
             }
         } 
+
+
+        /**
+         * Popup shortcode URL
+         *
+         *  @since      1.0.0
+        */
+        public static function popup_shortcode_func( $atts, $content = "" ) {
+            return '<a href="#super-popup-'.$atts['id'].'">'.$content.'</a>';
+        }
 
 
         /**
@@ -202,12 +218,65 @@ if( !class_exists( 'SUPER_Popup' ) ) :
 
 
         /**
+         * Hook into stylesheets of the form and add styles for the popup
+         *
+         *  @since      1.0.0
+        */
+        public static function add_popup_styles( $styles, $data ) {
+            var_dump($data['settings']);
+
+            $s = '.super-popup-'.$data['id'].' ';
+            $v = $data['settings'];
+            $styles .= $s.'.super-popup-close > .super-popup-close-icon {';
+            $styles .= 'color: ' . $v['popup_close_btn_icon_color'] . ';';
+            $styles .= '}';
+            return $styles;
+        }
+
+
+        /**
+         * Add custom Popup styles to the form
+         *
+         *  @since      1.0.0
+        */
+        /*
+        public static function add_custom_popup_styles( $result, $data ) {
+            $settings = $data['settings'];
+            if( (isset($settings['popup_enabled'])) && ($settings['popup_enabled']=='true') ) {
+                if( (isset($settings['popup_close_btn'])) && ($settings['popup_close_btn']=='true') ) {
+                    $result .= '.super-popup > .super-popup-close > .super-popup-close-icon {';
+                    $result .= 'color:'.$settings['popup_close_btn_icon_color'];
+                    $result .= '}';
+                }
+            }
+            return $result;
+                /*
+                'popup_close_btn' => array(
+                'popup_close_btn_icon_color' => array(
+                'popup_close_btn_bg_color' => array(
+                'popup_close_btn_label' => array(
+                'popup_close_btn_label_color' => array(
+                'popup_close_btn_icon_size' => array(
+                'popup_close_btn_border' => array(
+                'popup_close_btn_border_color' => array(
+                'popup_close_btn_top' => array(
+                'popup_close_btn_right' => array(
+                'popup_close_btn_padding' => array(
+                'popup_close_btn_radius' => array(
+                */
+        //}
+
+        
+
+
+        /**
          *  Add the form inside the popup wrapper
          *
          *  @since      1.0.0
         */
         function add_form_inside_popup_wrapper( $result, $data ) {
-            if( (isset($data["settings"]['popup_enabled'])) && ($data["settings"]['popup_enabled']=='true') ) {
+            $settings = $data["settings"];
+            if( (isset($settings['popup_enabled'])) && ($settings['popup_enabled']=='true') ) {
                 $form_html = $result;
                 $result = '';
                 $result .= '<style type="text/css">';
@@ -220,11 +289,27 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                 $result .= '</style>';
                 $result .= '<div class="super-popup-wrapper">';
                     $result .= '<div class="super-popup-' . $data["id"] . ' super-popup">';
-                        $result .= '<span class="super-popup-close"></span>';
-                        $result .= '<div class="super-popup-content">';
+                        if( $settings['popup_close_btn']=='true' ) {
+                            $result .= '<span class="super-popup-close">';
+                            $result .= '<span class="super-popup-close-label"></span>';
+                            $result .= '<span class="super-popup-close-icon"></span>';
+                            $result .= '</span>';    
+                        }
+                        
+                        // Custom popup paddings
+                        $styles = '';
+                        if( !isset( $settings['popup_enable_padding'] ) ) $settings['popup_enable_padding'] = '';
+                        if( $settings['popup_enable_padding']=='true' ) {
+                            if( !isset( $settings['popup_padding'] ) ) $settings['popup_padding'] = '';
+                            if( $settings['popup_padding']!='' ) {
+                                $styles = ' style="padding:' . $settings['popup_padding'] . ';"';
+                            }
+                        }
+
+                        $result .= '<div class="super-popup-content"' . $styles . '>';
                             $result .= $form_html;
                         $result .= '</div>';
-                        $result .= '<textarea name="super-popup-settings">' . $this->form_configuration_data($data["settings"]) . '</textarea>';
+                        $result .= '<textarea name="super-popup-settings">' . $this->form_configuration_data( $settings ) . '</textarea>';
                     $result .= '</div>';
                 $result .= '</div>';
             }
@@ -408,6 +493,142 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'filter_value' => 'true',
                         'filter'=>true,
                     ),
+
+                    'popup_close_btn' => array(
+                        'default' => SUPER_Settings::get_value( 0, 'popup_close_btn', $settings['settings'], 'true' ),
+                        'type' => 'checkbox',
+                        'filter'=>true,
+                        'values' => array(
+                            'true' => __( 'Display close (X) button', 'super-forms' ),
+                        ),
+                        'parent' => 'popup_enabled',
+                        'filter_value' => 'true',
+                    ),
+                    'popup_close_btn_icon_color' => array(
+                        'name' => __( 'Close button icon color', 'super-forms' ),
+                        'type'=>'color',  
+                        'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_icon_color', $settings['settings'], '#fff' ),
+                        'filter'=>true,
+                        'parent' => 'popup_close_btn',
+                        'filter_value' => 'true',  
+                    ),
+                    'popup_close_btn_bg_color' => array(
+                        'name' => __( 'Close button background color (leave blank for none)', 'super-forms' ),
+                        'type'=>'color',  
+                        'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_bg_color', $settings['settings'], '#00bc65' ),
+                        'filter'=>true,
+                        'parent' => 'popup_close_btn',
+                        'filter_value' => 'true',  
+                    ),
+
+
+                    'popup_close_btn_label' => array(
+                        'name' => __( 'Close button label text e.g: Close', 'super-forms' ),
+                        'type'=>'text',  
+                        'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_label', $settings['settings'], '' ),
+                        'filter'=>true,
+                        'parent' => 'popup_close_btn',
+                        'filter_value' => 'true',  
+                    ),
+                    'popup_close_btn_label_color' => array(
+                        'name' => __( 'Close button label color', 'super-forms' ),
+                        'type'=>'color',  
+                        'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_label_color', $settings['settings'], '#00bc65' ),
+                        'filter'=>true,
+                        'parent' => 'popup_close_btn',
+                        'filter_value' => 'true',  
+                    ),
+                    'popup_close_btn_icon_size' => array(
+                        'name' => __( 'Close button icon size in pixels', 'super-forms' ),
+                        'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_icon_size', $settings['settings'], 14 ),
+                        'type'=>'slider',
+                        'min'=>10,
+                        'max'=>50,
+                        'steps'=>1,
+                        'filter'=>true,
+                        'parent' => 'popup_close_btn',
+                        'filter_value' => 'true',
+                    ),
+                    'popup_close_btn_border' => array(
+                        'name' => __( 'Close button border size in pixels', 'super-forms' ),
+                        'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_border', $settings['settings'], 0 ),
+                        'type'=>'slider',
+                        'min'=>10,
+                        'max'=>50,
+                        'steps'=>1,
+                        'filter'=>true,
+                        'parent' => 'popup_close_btn',
+                        'filter_value' => 'true',
+                    ),
+                    'popup_close_btn_border_color' => array(
+                        'name' => __( 'Close button border color', 'super-forms' ),
+                        'type'=>'color',  
+                        'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_border_color', $settings['settings'], '' ),
+                        'filter'=>true,
+                        'parent' => 'popup_close_btn',
+                        'filter_value' => 'true',  
+                    ),
+                    'popup_close_btn_top' => array(
+                        'name' => __( 'Position top in pixels', 'super-forms' ),
+                        'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_top', $settings['settings'], 0 ),
+                        'type'=>'slider',
+                        'min'=>0,
+                        'max'=>100,
+                        'steps'=>1,
+                        'filter'=>true,
+                        'parent' => 'popup_close_btn',
+                        'filter_value' => 'true',
+                    ),
+                    'popup_close_btn_right' => array(
+                        'name' => __( 'Position right in pixels', 'super-forms' ),
+                        'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_right', $settings['settings'], 0 ),
+                        'type'=>'slider',
+                        'min'=>0,
+                        'max'=>50,
+                        'steps'=>1,
+                        'filter'=>true,
+                        'parent' => 'popup_close_btn',
+                        'filter_value' => 'true',
+                    ),
+                    'popup_close_btn_padding' => array(
+                        'name' => __( 'Popup close button paddings e.g: 0px 0px 0px 0px', 'super-forms' ),
+                        'label' => __( '(leave blank for default paddings)', 'super-forms' ),
+                        'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_padding', $settings['settings'], '' ),
+                        'type'=>'text',
+                        'filter'=>true,
+                        'parent'=>'popup_close_btn',
+                        'filter_value'=>'true'
+                    ),
+                    'popup_close_btn_radius' => array(
+                        'name' => __( 'Close button border radius in pixels', 'super-forms' ),
+                        'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_radius', $settings['settings'], 0 ),
+                        'type'=>'slider',
+                        'min'=>0,
+                        'max'=>100,
+                        'steps'=>1,
+                        'filter'=>true,
+                        'parent' => 'popup_close_btn',
+                        'filter_value' => 'true',
+                    ),
+
+                    'popup_enable_padding' => array(
+                        'default' => SUPER_Settings::get_value( 0, 'popup_enable_padding', $settings['settings'], '' ),
+                        'type' => 'checkbox', 
+                        'filter'=>true,
+                        'values' => array(
+                            'true' => __( 'Enable custom popup padding', 'super-forms' ),
+                        )
+                    ),
+                    'popup_padding' => array(
+                        'name' => __( 'Popup paddings e.g: 0px 0px 0px 0px', 'super-forms' ),
+                        'label' => __( '(leave blank for default paddings)', 'super-forms' ),
+                        'default' => SUPER_Settings::get_value( 0, 'popup_padding', $settings['settings'], '' ),
+                        'type'=>'text',
+                        'filter'=>true,
+                        'parent'=>'popup_enable_padding',
+                        'filter_value'=>'true'
+                    ), 
+
                     'popup_background_color' => array(
                         'name' => __( 'Background color', 'super-forms' ),
                         'type'=>'color',  
@@ -426,7 +647,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                     ), 
                     'popup_overlay_opacity' => array(
                         'name' => __( 'Overlay background opacity', 'super-forms' ),
-                        'default' => SUPER_Settings::get_value( 0, 'popup_overlay_opacity', $settings['settings'], 1 ),
+                        'default' => SUPER_Settings::get_value( 0, 'popup_overlay_opacity', $settings['settings'], 0.5 ),
                         'type'=>'slider',
                         'min'=>0,
                         'max'=>1,
@@ -462,7 +683,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'name' => __( 'Background Image Size', 'super-forms' ),
                         'filter'=>true,
                         'type'=>'select',
-                        'default' => SUPER_Settings::get_value( 0, 'popup_background_image_size', $settings['settings'], 'inherit' ),
+                        'default' => SUPER_Settings::get_value( 0, 'popup_background_image_size', $settings['settings'], 'cover' ),
                         'values'=>array( 
                             'inherit' => __( 'Default (inherit)', 'super-forms' ),
                             'contain' => __( 'Contain / Fit (contain)', 'super-forms' ),
@@ -471,36 +692,6 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'parent' => 'popup_enabled',
                         'filter_value' => 'true',
                     ),
-
-                    'popup_close_button' => array(
-                        'desc' => __( 'Close button (X) on top right corner of the popup', 'super-forms' ),
-                        'default' => SUPER_Settings::get_value( 0, 'popup_close_button', $settings['settings'], 'true' ),
-                        'type' => 'checkbox',
-                        'filter'=>true,
-                        'values' => array(
-                            'true' => __( 'Display close button', 'super-forms' ),
-                        ),
-                        'parent' => 'popup_enabled',
-                        'filter_value' => 'true',
-                    ),
-                    'popup_close_button_bg_color' => array(
-                        'name' => __( 'Close button background color', 'super-forms' ),
-                        'type'=>'color',  
-                        'default' => SUPER_Settings::get_value( 0, 'popup_close_button_color', $settings['settings'], '#00bc65' ),
-                        'filter'=>true,
-                        'parent' => 'popup_enabled',
-                        'filter_value' => 'true',  
-                    ),
-                    'popup_close_button_icon_color' => array(
-                        'name' => __( 'Close button icon color', 'super-forms' ),
-                        'type'=>'color',  
-                        'default' => SUPER_Settings::get_value( 0, 'popup_close_button_font_color', $settings['settings'], '#fff' ),
-                        'filter'=>true,
-                        'parent' => 'popup_enabled',
-                        'filter_value' => 'true',  
-                    ),
-
-
                     'popup_slide' => array(
                         'name' => __( 'Popup slide in', 'super-forms' ),
                         'desc' => __( 'Slide in: From Top, Right, Bottom or Left', 'super-forms' ),
@@ -520,7 +711,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                     'popup_fade_duration' => array(
                         'name' => __( 'Popup FadeIn duration in milliseconds', 'super-forms' ),
                         'desc' => __( 'FadeIn duration in milliseconds (0 is no fade effect)', 'super-forms' ),
-                        'default' => SUPER_Settings::get_value( 0, 'popup_fade_duration', $settings['settings'], 1000 ),
+                        'default' => SUPER_Settings::get_value( 0, 'popup_fade_duration', $settings['settings'], 300 ),
                         'type'=>'slider',
                         'min'=>0,
                         'max'=>5000,
@@ -545,8 +736,6 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'parent' => 'popup_enabled',
                         'filter_value' => 'true',
                     ),
-
-
                     'popup_enable_borders' => array(
                         'default' => SUPER_Settings::get_value( 0, 'popup_enable_borders', $settings['settings'], '' ),
                         'type' => 'checkbox',
