@@ -353,8 +353,8 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                 if( ( ($settings['popup_logged_in']=='true') && (is_user_logged_in()) ) || ( ($settings['popup_not_logged_in']=='true') && (!is_user_logged_in()) ) ) {
                     $form_html = $result;
                     $result = '';
-                    $result .= '<div class="super-popup-wrapper-' . $form_id . ' super-popup-wrapper" style="opacity:1;z-index:2147483647;">';
-                        $result .= '<div class="super-popup-' . $form_id . ' super-popup" style="opacity:1;">';
+                    $result .= '<div class="super-popup-wrapper-' . $form_id . ' super-popup-wrapper" style="opacity:0;z-index:-2147483648;">';
+                        $result .= '<div class="super-popup-' . $form_id . ' super-popup" style="opacity:0;">';
                             
                             // Popup close button
                             if( $settings['popup_close_btn']=='true' ) {
@@ -399,7 +399,11 @@ if( !class_exists( 'SUPER_Popup' ) ) :
         public static function load_scripts( $data ) {
             if( (isset($data['settings']['popup_enabled'])) && ($data['settings']['popup_enabled']=='true') ) {
                 wp_enqueue_style( 'super-popup', plugin_dir_url( __FILE__ ) . 'assets/css/popup.min.css', array(), SUPER_Popup()->version );
-                wp_enqueue_script( 'super-popup', plugin_dir_url( __FILE__ ) . 'assets/js/popup.min.js', array( 'jquery', 'super-common' ), SUPER_Popup()->version );
+                wp_enqueue_script( 'super-css-plugin', plugin_dir_url( __FILE__ ) . 'assets/js/css-plugin.min.js', array( 'jquery', 'super-common' ), SUPER_Popup()->version );
+                wp_enqueue_script( 'super-ease-pack', plugin_dir_url( __FILE__ ) . 'assets/js/ease-pack.min.js', array( 'super-css-plugin' ), SUPER_Popup()->version );
+                wp_enqueue_script( 'super-tween-lite', plugin_dir_url( __FILE__ ) . 'assets/js/tween-lite.min.js', array( 'super-ease-pack' ), SUPER_Popup()->version );
+                wp_enqueue_script( 'super-jquery-gsap', plugin_dir_url( __FILE__ ) . 'assets/js/jquery.gsap.min.js', array( 'super-tween-lite' ), SUPER_Popup()->version );
+                wp_enqueue_script( 'super-popup', plugin_dir_url( __FILE__ ) . 'assets/js/popup.min.js', array( 'super-jquery-gsap' ), SUPER_Popup()->version );
                 wp_localize_script( 'super-popup', 'super_popup_i18n', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
             }
         }
