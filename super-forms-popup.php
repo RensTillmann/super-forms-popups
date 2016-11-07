@@ -464,7 +464,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'type' => 'checkbox',
                         'filter'=>true,
                         'values' => array(
-                            'true' => __( 'Show popup to not logged in users', 'super-forms' ),
+                            'true' => __( 'Show popup to none logged in users', 'super-forms' ),
                         ),
                         'parent' => 'popup_enabled',
                         'filter_value' => 'true',
