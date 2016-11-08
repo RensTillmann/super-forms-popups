@@ -196,6 +196,18 @@ if( !class_exists( 'SUPER_Popup' ) ) :
             $functions['after_responsive_form_hook'][] = array(
                 'name' => 'init_responsive_popup'
             );
+
+            $functions['before_submit_button_click_hook'][] = array(
+                'name' => 'init_check_submit_button_close_popup'
+            );
+
+            $functions['after_email_send_hook'][] = array(
+                'name' => 'init_set_expiration_cookie_on_submit_popup'
+            );
+
+
+
+
             return $functions;
         }
 
@@ -250,18 +262,18 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                 $styles .= $s.'{';
                     // Popup width
                     $styles .= 'width: ' . $v['width'] . 'px;';                    
+                    if( $v['background_color']!='' ) {
+                        $styles .= 'background-color: ' . $v['background_color'] . ';';
+                    }
                     // Popup background image
                     if( $v['background_image']!='' ) {
-                            $styles .= 'background-image: url(' . $v['background_image'] . ');';
-                            if( $v['background_color']!='' ) {
-                                $styles .= 'background-color: ' . $v['background_color'] . ';';
-                            }
-                            if( $v['background_image_repeat']!='' ) {
-                                $styles .= 'background-repeat: ' . $v['background_image_repeat'] . ';';
-                            }
-                            if( $v['background_image_size']!='' ) {
-                                $styles .= 'background-size: ' . $v['background_image_size'] . ';';
-                            }
+                        $styles .= 'background-image: url(' . $v['background_image'] . ');';
+                        if( $v['background_image_repeat']!='' ) {
+                            $styles .= 'background-repeat: ' . $v['background_image_repeat'] . ';';
+                        }
+                        if( $v['background_image_size']!='' ) {
+                            $styles .= 'background-size: ' . $v['background_image_size'] . ';';
+                        }
                     }
                     // Popup border / radius
                     if( $v['enable_borders']=='true') {
@@ -753,17 +765,32 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'parent'=>'popup_enable_padding',
                         'filter_value'=>'true'
                     ),
+                    'popup_expire_trigger' => array(
+                        'name' => __( 'Enable expiration cookie (show popup only once)', 'super-forms' ),
+                        'type'=>'select',
+                        'default' => SUPER_Settings::get_value( 0, 'popup_expire_trigger', $settings['settings'], '' ),
+                        'values'=>array( 
+                            '' => __( 'Disabled', 'super-forms' ),
+                            'view' => __( 'When popup has been viewed', 'super-forms' ),
+                            'close' => __( 'When popup has been closed', 'super-forms' ),
+                            'submit' => __( 'When form has been submitted', 'super-forms' ),
+                        ),
+                        'parent' => 'popup_enabled',
+                        'filter_value' => 'true',
+                        'filter'=>true,
+                    ),
                     'popup_expire' => array(
-                        'name' => __( 'Popup expire time in days (0 = always popup)', 'super-forms' ),
-                        'default' => SUPER_Settings::get_value( 0, 'popup_expire', $settings['settings'], '0' ),
+                        'name' => __( 'Expiration time in days', 'super-forms' ),
+                        'default' => SUPER_Settings::get_value( 0, 'popup_expire', $settings['settings'], '1' ),
                         'type'=>'slider',
-                        'min'=>0,
+                        'min'=>1,
                         'max'=>365,
                         'steps'=>1,
                         'filter'=>true,
-                        'parent' => 'popup_enabled',
-                        'filter_value' => 'true',
+                        'parent' => 'popup_expire_trigger',
+                        'filter_value' => 'view,close,submit',
                     ),
+
                     'popup_width' => array(
                         'name' => __( 'Popup width in pixels (px)', 'super-forms' ),
                         'default' => SUPER_Settings::get_value( 0, 'popup_width', $settings['settings'], '700' ),
