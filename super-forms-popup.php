@@ -314,7 +314,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         if( $v['close_btn_padding']!='' ) {
                             $styles .= 'padding: ' . $v['close_btn_padding'] . ';';
                         }
-                        if( ($v['close_btn_padding']!='') && ($v['close_btn_padding']>0) ) {
+                        if( ($v['close_btn_radius']!='') && ($v['close_btn_radius']>0) ) {
                             $styles .= '-webkit-border-radius: ' . $v['close_btn_radius'] . 'px;';
                             $styles .= '-moz-border-radius: ' . $v['close_btn_radius'] . 'px;';
                             $styles .= 'border-radius: ' . $v['close_btn_radius'] . 'px;';
@@ -355,7 +355,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
             if( (isset($settings['popup_enabled'])) && ($settings['popup_enabled']=='true') ) {
 
                 // Check if expiration is enabled and if cookie exists
-                if( $settings['popup_expire']>0 ) {
+                if( ($settings['popup_expire_trigger']!='') && ($settings['popup_expire']>0) ) {
                     if( isset($_COOKIE['super_popup_expire_'.$form_id]) ) {
                         return '';
                     }
@@ -688,7 +688,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'name' => __( 'Close button border size in pixels (px)', 'super-forms' ),
                         'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_border', $settings['settings'], '0' ),
                         'type'=>'slider',
-                        'min'=>1,
+                        'min'=>0,
                         'max'=>10,
                         'steps'=>1,
                         'filter'=>true,
