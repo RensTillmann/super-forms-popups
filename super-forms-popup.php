@@ -164,6 +164,12 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                 // Filters since 1.0.0 
                 add_filter( 'super_settings_after_export_import_filter', array( $this, 'register_popup_settigs' ), 50, 2 ); 
                 add_filter( 'super_form_styles_filter', array( $this, 'add_popup_styles' ), 10, 2 );
+                add_filter( 'super_common_js_dynamic_functions_filter', array( $this, 'add_dynamic_function' ), 100, 2 );
+
+                // Actions since 1.0.0
+                add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+                add_action( 'admin_print_scripts', array( $this, 'localize_printed_scripts' ), 5 );
+                add_action( 'admin_print_footer_scripts', array( $this, 'localize_printed_scripts' ), 5 );
 
             }
             if ( $this->is_request( 'ajax' ) ) {
@@ -174,6 +180,202 @@ if( !class_exists( 'SUPER_Popup' ) ) :
 
             }
         } 
+
+
+        /**
+         * Enqueue scripts for each admin page
+         * 
+         * @since       1.0.0
+        */
+        public function enqueue_scripts() {
+            
+            if ( function_exists( 'get_current_screen' ) ) {
+                $current_screen = get_current_screen();
+            }else{
+                $current_screen = new stdClass();
+                $current_screen->id = '';
+            }
+
+            // Enqueue Javascripts
+            if( $enqueue_scripts = self::get_scripts() ) {
+                foreach( $enqueue_scripts as $handle => $args ) {
+                    if ( ( in_array( $current_screen->id, $args['screen'] ) ) || ( $args['screen'][0]=='all' ) ) {
+                        if($args['method']=='register'){
+                            self::$scripts[] = $handle;
+                            wp_register_script( $handle, $args['src'], $args['deps'], $args['version'], $args['footer'] );
+                        }else{
+                            wp_enqueue_script( $handle, $args['src'], $args['deps'], $args['version'], $args['footer'] );
+                        }
+                    }
+                }
+            }
+            
+            // Enqueue Styles
+            if( $enqueue_styles = self::get_styles() ) {
+                foreach( $enqueue_styles as $handle => $args ) {
+                    if ( ( in_array( $current_screen->id, $args['screen'] ) ) || ( $args['screen'][0]=='all' ) ) {
+                        if($args['method']=='register'){
+                            wp_register_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
+                        }else{
+                            wp_enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
+                        }
+                    }
+                }
+            }
+            
+        }
+
+
+
+        /**
+         * Get styles for the backend
+         *
+         * @access private
+         * @return array
+         * [$handle, $src, $deps, $ver, $media]
+         *
+         * @since       1.0.0
+        */
+        public static function get_styles() {
+            return apply_filters( 
+                'super_enqueue_styles', 
+                array(
+                    'super-popup' => array(
+                        'src'     => plugin_dir_url( __FILE__ ) . 'assets/css/popup.min.css',
+                        'deps'    => array(),
+                        'version' => SUPER_Popup()->version,
+                        'media'   => 'all',
+                        'screen'  => array(
+                            'super-forms_page_super_create_form',
+                        ),
+                        'method'  => 'enqueue',
+                    )
+                )
+            );
+        }
+        
+        
+        /**
+         * Get scripts for the backend
+         *
+         * @access private
+         * @return array
+         * [$handle, $src, $deps, $ver, $in_footer]
+         *
+         * @since       1.0.0
+        */
+        public static function get_scripts() {
+
+            return apply_filters( 
+                'super_enqueue_scripts', 
+                array(
+                    'super-css-plugin' => array(
+                        'src'     => plugin_dir_url( __FILE__ ) . 'assets/js/css-plugin.min.js',
+                        'deps'    => array( 'jquery', 'super-common' ),
+                        'version' => SUPER_Popup()->version,
+                        'footer'  => false,
+                        'screen'  => array( 
+                            'super-forms_page_super_create_form',
+                        ),
+                        'method'  => 'enqueue',
+                    ),
+                    'super-ease-pack' => array(
+                        'src'     => plugin_dir_url( __FILE__ ) . 'assets/js/ease-pack.min.js',
+                        'deps'    => array( 'super-css-plugin' ),
+                        'version' => SUPER_Popup()->version,
+                        'footer'  => false,
+                        'screen'  => array( 
+                            'super-forms_page_super_create_form',
+                        ),
+                        'method'  => 'enqueue',
+                    ),
+                    'super-tween-lite' => array(
+                        'src'     => plugin_dir_url( __FILE__ ) . 'assets/js/tween-lite.min.js',
+                        'deps'    => array( 'super-ease-pack' ),
+                        'version' => SUPER_Popup()->version,
+                        'footer'  => false,
+                        'screen'  => array( 
+                            'super-forms_page_super_create_form',
+                        ),
+                        'method'  => 'enqueue',
+                    ),
+                    'super-jquery-gsap' => array(
+                        'src'     => plugin_dir_url( __FILE__ ) . 'assets/js/jquery.gsap.min.js',
+                        'deps'    => array( 'super-tween-lite' ),
+                        'version' => SUPER_Popup()->version,
+                        'footer'  => false,
+                        'screen'  => array( 
+                            'super-forms_page_super_create_form',
+                        ),
+                        'method'  => 'enqueue',
+                    ),
+                    'super-popup' => array(
+                        'src'     => plugin_dir_url( __FILE__ ) . 'assets/js/popup.min.js',
+                        'deps'    => array( 'super-jquery-gsap' ),
+                        'version' => SUPER_Popup()->version,
+                        'footer'  => false,
+                        'screen'  => array( 
+                            'super-forms_page_super_create_form',
+                        ),
+                        'method'  => 'register', // Register because we need to localize it
+                        'localize'=> array(
+                            'ajaxurl' => admin_url( 'admin-ajax.php' )
+                        ),
+                    ),
+                )
+            );
+        }
+        
+        
+        /**
+         * Localize a script once.
+         *
+         * @access private
+         * @param  string $handle
+         *
+         * @since       1.0.0
+        */
+        private static function localize_script( $handle ) {
+            if ( ! in_array( $handle, self::$wp_localize_scripts ) && wp_script_is( $handle, 'registered' ) && ( $data = self::get_script_data( $handle ) ) ) {
+                $name = str_replace( '-', '_', $handle ) . '_i18n';
+                self::$wp_localize_scripts[] = $handle;
+                wp_localize_script( $handle, $name, apply_filters( $name, $data ) );
+                wp_enqueue_script( $handle );
+            }        
+        }
+        
+        
+        /**
+         * Localize scripts only when enqueued
+         *
+         * @access private
+         * @param  string $handle
+         *
+         * @since       1.0.0
+        */
+        public static function localize_printed_scripts() {
+            foreach ( self::$scripts as $handle ) {
+                self::localize_script( $handle );
+            }
+        }
+        
+        
+        /**
+         * Return data for script handles.
+         * @access private
+         * @param  string $handle
+         * @return array|bool
+        */
+        private static function get_script_data( $handle ) {
+            
+            $scripts = self::get_scripts();
+            if( isset( $scripts[$handle]['localize'] ) ) {
+                return $scripts[$handle]['localize'];
+            }
+            
+            return false;
+        
+        }
 
 
         /**
@@ -196,18 +398,15 @@ if( !class_exists( 'SUPER_Popup' ) ) :
             $functions['after_responsive_form_hook'][] = array(
                 'name' => 'init_responsive_popup'
             );
-
             $functions['before_submit_button_click_hook'][] = array(
                 'name' => 'init_check_submit_button_close_popup'
             );
-
             $functions['after_email_send_hook'][] = array(
                 'name' => 'init_set_expiration_cookie_on_submit_popup'
             );
-
-
-
-
+            $functions['after_preview_loaded_hook'][] = array(
+                'name' => 'init_show_preview_popup'
+            );
             return $functions;
         }
 

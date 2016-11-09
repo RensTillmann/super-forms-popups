@@ -31,10 +31,14 @@
 .super-popup-content {
 	width: 100%;
 	padding: 20px 20px 20px 20px;
-	overflow: auto;
+	overflow: visible;
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
+}
+.super-first-responsiveness .super-popup-content,
+.super-second-responsiveness .super-popup-content {
+	overflow: auto;
 }
 .super-popup-content > .super-form {
 	float:left;
