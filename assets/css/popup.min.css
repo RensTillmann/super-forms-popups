@@ -31,15 +31,15 @@
 .super-popup-content {
 	width: 100%;
 	padding: 20px 20px 20px 20px;
-	overflow: visible;
+	overflow: inherit;
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
+	float: left;
+	position: relative;
 }
 .super-first-responsiveness .super-popup-content,
-.super-second-responsiveness .super-popup-content {
-	overflow: auto;
-}
+.super-second-responsiveness .super-popup-content {overflow-y: auto;}
 .super-popup-content > .super-form {
 	float:left;
 }
@@ -62,19 +62,18 @@
 	display: inline-block;
 	height:100%;
 	text-align:center;
-	line-height:30px;
 	color:white;
-	padding:0px 10px 2px 10px;
+	padding: 5px 9px 5px 9px;
 	float: left;
 }
 .super-popup > .super-popup-close > .super-popup-close-icon:after {
 	content:'\f00d';
 	font-family:'Fontawesome';
 }
-.super-popup-close,
-.super-popup-close:focus,
-.super-popup-close:hover, 
-.super-popup-close:active {
+span.super-popup-close,
+span.super-popup-close:focus,
+span.super-popup-close:hover, 
+span.super-popup-close:active {
 	text-decoration: none !important;
 }
 .super-popup-wrapper .super-popup.stickyTop {

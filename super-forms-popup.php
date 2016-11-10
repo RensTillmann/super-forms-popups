@@ -473,6 +473,8 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         if( $v['background_image_size']!='' ) {
                             $styles .= 'background-size: ' . $v['background_image_size'] . ';';
                         }
+                    }else{
+                        $styles .= 'background-image: none;';
                     }
                     // Popup border / radius
                     if( $v['enable_borders']=='true') {
