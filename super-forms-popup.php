@@ -165,11 +165,14 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                 add_filter( 'super_settings_after_export_import_filter', array( $this, 'register_popup_settigs' ), 50, 2 ); 
                 add_filter( 'super_form_styles_filter', array( $this, 'add_popup_styles' ), 10, 2 );
                 add_filter( 'super_common_js_dynamic_functions_filter', array( $this, 'add_dynamic_function' ), 100, 2 );
+                add_filter( 'super_settings_end_filter', array( $this, 'activation' ), 100, 2 );
 
                 // Actions since 1.0.0
                 add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
                 add_action( 'admin_print_scripts', array( $this, 'localize_printed_scripts' ), 5 );
                 add_action( 'admin_print_footer_scripts', array( $this, 'localize_printed_scripts' ), 5 );
+
+
 
             }
             if ( $this->is_request( 'ajax' ) ) {
@@ -179,7 +182,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                 // Actions since 1.0.0
 
             }
-        } 
+        }
 
 
         /**
@@ -408,6 +411,48 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                 'name' => 'init_show_preview_popup'
             );
             return $functions;
+        }
+
+
+        /** 
+         *  Activation
+         *
+         *  @since      1.0.9
+        */
+
+
+        /**
+         * Add the activation under the "Activate" TAB
+         * 
+         * @since       1.0.0
+        */
+        public function activation($array, $data) {
+            $settings = get_option( 'super_settings' );
+            if(!isset($settings['license_popup'])) $settings['license_popup'] = '';
+            $title = 'Popups';
+            $add_on = 'popup';
+            $sac = get_option( 'sac_' . $add_on, 0 );
+            if( $sac==1 ) {
+                $sact = '<strong style="color:green;">Add-on is activated!</strong>';
+                $dact = '<br /><br />---';
+                $dact .= '<br /><br /><strong style="color:green;">If you want to transfer this add-on to another domain,<br />';
+                $dact .= 'you can deactivate it on this domain by clicking the following button:</strong>';
+                $dact .= '<br /><br /><span class="button super-button deactivate-add-on">Deactivate on current domain</span>';
+            }else{
+                $sact = '<strong style="color:red;">Add-on is not yet activated!</strong>';
+                $sact .= '<br /><br />---';
+                $sact .= '<br /><br /><span class="button super-button activate-add-on">Activate</span>';
+                $sact .= '';
+            }
+            $new_activation_html = '';
+            $new_activation_html .= '<div class="super-field">';
+            $new_activation_html .= '<div class="super-field-info"></div>';
+            $new_activation_html .= '<div class="input"><strong>Super Forms - ' . $title . '</strong><br /><input type="text" name="license_' . $add_on . '" class="element-field" value="' . $settings['license_popup'] . '" /></div>';
+            $new_activation_html .= '<input type="hidden" name="add_on" value="' . $add_on . '" />';
+            $new_activation_html .= '<div class="input add-on-activation-msg">' . $sact . $dact . '</div>';
+            $new_activation_html .= '</div>';
+            $array['activation']['html'][] = $new_activation_html;
+            return $array;
         }
 
 
