@@ -38,6 +38,14 @@ if( !class_exists( 'SUPER_Popup' ) ) :
         */
         public $version = '1.0.0';
 
+
+        /**
+         * @var string
+         *
+         *  @since      1.0.0
+        */
+        public $add_on_slug = 'popup';
+
         
         /**
          * @var SUPER_Popup The single instance of the class
@@ -141,7 +149,12 @@ if( !class_exists( 'SUPER_Popup' ) ) :
         */
         private function init_hooks() {
             
+            register_deactivation_hook( __FILE__, array( $this, 'deactivate' ) );
+
             add_shortcode( 'super-popup', array( $this, 'popup_shortcode_func' ) );
+
+            // Filters since 1.0.0
+            add_filter( 'super_after_activation_message_filter', array( $this, 'activation_message' ), 10, 2 ); 
 
             // Actions since 1.0.0
             add_action( 'wp_ajax_super_set_popup_expire_cookie', array( $this, 'set_popup_expire_cookie' ) ); 
@@ -414,23 +427,16 @@ if( !class_exists( 'SUPER_Popup' ) ) :
         }
 
 
-        /** 
-         *  Activation
-         *
-         *  @since      1.0.9
-        */
-
-
         /**
          * Add the activation under the "Activate" TAB
          * 
          * @since       1.0.0
         */
         public function activation($array, $data) {
+            $add_on = SUPER_Popup()->add_on_slug;
             $settings = get_option( 'super_settings' );
-            if(!isset($settings['license_popup'])) $settings['license_popup'] = '';
+            if(!isset($settings['license_' . $add_on])) $settings['license_' . $add_on] = '';
             $title = 'Popups';
-            $add_on = 'popup';
             $sac = get_option( 'sac_' . $add_on, 0 );
             if( $sac==1 ) {
                 $sact = '<strong style="color:green;">Add-on is activated!</strong>';
@@ -447,12 +453,66 @@ if( !class_exists( 'SUPER_Popup' ) ) :
             $new_activation_html = '';
             $new_activation_html .= '<div class="super-field">';
             $new_activation_html .= '<div class="super-field-info"></div>';
-            $new_activation_html .= '<div class="input"><strong>Super Forms - ' . $title . '</strong><br /><input type="text" name="license_' . $add_on . '" class="element-field" value="' . $settings['license_popup'] . '" /></div>';
+            $new_activation_html .= '<div class="input"><strong>Super Forms - ' . $title . '</strong><br /><input type="text" name="license_' . $add_on . '" class="element-field" value="' . $settings['license_' . $add_on] . '" /></div>';
             $new_activation_html .= '<input type="hidden" name="add_on" value="' . $add_on . '" />';
             $new_activation_html .= '<div class="input add-on-activation-msg">' . $sact . $dact . '</div>';
             $new_activation_html .= '</div>';
             $array['activation']['html'][] = $new_activation_html;
             return $array;
+        }
+
+
+        /**  
+         *  Deactivate
+         *
+         *  Upon plugin deactivation delete activation
+         *
+         *  @since      1.0.0
+         */
+        public static function deactivate(){
+            $add_on = SUPER_Popup()->add_on_slug;
+            $settings = get_option( 'super_settings' );
+            if(isset($settings['license_' . $add_on])){
+                $license = $settings['license_' . $add_on];
+                $domain = $_SERVER['SERVER_NAME'];
+                $url = 'http://f4d.nl/super-forms/?api=license-deactivate-add-on&add-on=' . $add_on . '&key=' . $license . '&domain=' . $domain;
+                wp_remote_get( $url, array('timeout'=>60) );
+            }
+            delete_option( 'sac_' . $add_on );
+        }
+
+
+        /**
+         * Check license and show activation message
+         * 
+         * @since       1.0.0
+        */
+        public function activation_message( $activation_msg, $data ) {
+            $form_id = absint($data['id']);
+            $settings = $data['settings'];
+            if( (isset($settings['popup_enabled'])) && ($settings['popup_enabled']=='true') ) {
+
+                // Check if expiration is enabled and if cookie exists
+                if( ($settings['popup_expire_trigger']!='') && ($settings['popup_expire']>0) ) {
+                    if( isset($_COOKIE['super_popup_expire_' . $form_id]) ) {
+                        return $activation_msg;
+                    }
+                }
+
+                // Generate popup HTML only if popup is enabled
+                if( ( ($settings['popup_logged_in']=='true') && (is_user_logged_in()) ) || ( ($settings['popup_not_logged_in']=='true') && (!is_user_logged_in()) ) ) {
+                    $add_on = SUPER_Popup()->add_on_slug;
+                    $sac = get_option( 'sac_' . $add_on, 0 );
+                    if( $sac!=1 ) {
+                        $activation_msg .= '<div class="super-msg error"><h1>Please note:</h1>';
+                        $activation_msg .= __( 'You haven\'t activated your Super Forms - Popup Add-on yet', 'super-forms' ) . '<br />';
+                        $activation_msg .= __( 'Please click <a target="_blank" href="' . admin_url() . 'admin.php?page=super_settings#activate">here</a> and enter you Purchase Code under the Activation TAB.', 'super-forms' );
+                        $activation_msg .= '<span class="close"></span></div>';
+                        $activation_msg .= '</div>';
+                    }
+                }
+            }
+            return $activation_msg;
         }
 
 
@@ -476,10 +536,10 @@ if( !class_exists( 'SUPER_Popup' ) ) :
         */
         public static function set_popup_expire_cookie() {
             $form_id = absint($_POST['form_id']);
-            if(!isset($_COOKIE['super_popup_expire_'.$form_id])) {
+            if(!isset($_COOKIE['super_popup_expire_' . $form_id])) {
                 $expire = absint($_POST['expire']);
                 if( $expire>0 ) {
-                    setcookie( 'super_popup_expire_'.$form_id, $form_id, time() + ($expire * DAY_IN_SECONDS), COOKIEPATH, COOKIE_DOMAIN, is_ssl() );
+                    setcookie( 'super_popup_expire_' . $form_id, $form_id, time() + ($expire * DAY_IN_SECONDS), COOKIEPATH, COOKIE_DOMAIN, is_ssl() );
                 }
             }
             die();
@@ -602,7 +662,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
 
                 // Check if expiration is enabled and if cookie exists
                 if( ($settings['popup_expire_trigger']!='') && ($settings['popup_expire']>0) ) {
-                    if( isset($_COOKIE['super_popup_expire_'.$form_id]) ) {
+                    if( isset($_COOKIE['super_popup_expire_' . $form_id]) ) {
                         return '';
                     }
                 }
