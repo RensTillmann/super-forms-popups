@@ -1010,7 +1010,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'filter_value' => 'true',  
                     ),
                     'popup_close_btn_top' => array(
-                        'name' => __( 'Position top in pixels (px)', 'super-forms' ),
+                        'name' => __( 'Close button position top in pixels (px)', 'super-forms' ),
                         'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_top', $settings['settings'], '0' ),
                         'type'=>'slider',
                         'min'=>-100,
@@ -1021,7 +1021,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'filter_value' => 'true',
                     ),
                     'popup_close_btn_right' => array(
-                        'name' => __( 'Position right in pixels (px)', 'super-forms' ),
+                        'name' => __( 'Close button position right in pixels (px)', 'super-forms' ),
                         'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_right', $settings['settings'], '0' ),
                         'type'=>'slider',
                         'min'=>-100,
@@ -1032,7 +1032,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'filter_value' => 'true',
                     ),
                     'popup_close_btn_padding' => array(
-                        'name' => __( 'Popup close button paddings e.g: 0px 0px 0px 0px', 'super-forms' ),
+                        'name' => __( 'Close button paddings e.g: 0px 0px 0px 0px', 'super-forms' ),
                         'label' => __( '(leave blank for default paddings)', 'super-forms' ),
                         'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_padding', $settings['settings'], '' ),
                         'type'=>'text',
