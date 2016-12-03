@@ -1,13 +1,13 @@
 <?php
 /**
- * Super Forms Popup
+ * Super Forms - Popups
  *
- * @package   Super Forms Popup
+ * @package   Super Forms - Popups
  * @author    feeling4design 
  * @copyright 2015 by feeling4design
  *
  * @wordpress-plugin
- * Plugin Name: Super Forms Popup
+ * Plugin Name: Super Forms - Popups
  * Plugin URI:  http://codecanyon.net/item/super-forms-drag-drop-form-builder/13979866
  * Description: Create fully customizable popups for Super Forms
  * Version:     1.0.0
@@ -44,7 +44,8 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          *
          *  @since      1.0.0
         */
-        public $add_on_slug = 'popup';
+        public $add_on_slug = 'popups';
+        public $add_on_name = 'Popups';
 
         
         /**
@@ -184,9 +185,8 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                 add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
                 add_action( 'admin_print_scripts', array( $this, 'localize_printed_scripts' ), 5 );
                 add_action( 'admin_print_footer_scripts', array( $this, 'localize_printed_scripts' ), 5 );
-
-
-
+                add_action( 'init', array( $this, 'update_plugin' ) );
+                
             }
             if ( $this->is_request( 'ajax' ) ) {
 
@@ -195,6 +195,19 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                 // Actions since 1.0.0
 
             }
+        }
+
+
+        /**
+         * Automatically update plugin from the repository
+         *
+         *  @since      1.2.0
+        */
+        function update_plugin() {
+            require_once ( SUPER_PLUGIN_DIR . '/includes/admin/update-super-forms.php' );
+            $plugin_remote_path = 'http://f4d.nl/super-forms/';
+            $plugin_slug = plugin_basename( __FILE__ );
+            new SUPER_WP_AutoUpdate( $this->version, $plugin_remote_path, $plugin_slug, '', '', $this->add_on_slug );
         }
 
 
@@ -405,7 +418,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
 
 
         /**
-         * Hook into stylesheets of the form and add styles for the calculator element
+         * Hook into the javascript functions
          *
          *  @since      1.0.0
         */
@@ -433,32 +446,11 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          * @since       1.0.0
         */
         public function activation($array, $data) {
-            $add_on = SUPER_Popup()->add_on_slug;
-            $settings = get_option( 'super_settings' );
-            if(!isset($settings['license_' . $add_on])) $settings['license_' . $add_on] = '';
-            $title = 'Popups';
-            $sac = get_option( 'sac_' . $add_on, 0 );
-            if( $sac==1 ) {
-                $sact = '<strong style="color:green;">Add-on is activated!</strong>';
-                $dact = '<br /><br />---';
-                $dact .= '<br /><br /><strong style="color:green;">If you want to transfer this add-on to another domain,<br />';
-                $dact .= 'you can deactivate it on this domain by clicking the following button:</strong>';
-                $dact .= '<br /><br /><span class="button super-button deactivate-add-on">Deactivate on current domain</span>';
+            if (method_exists('SUPER_Forms','add_on_activation_message')) {
+                return SUPER_Forms::add_on_activation($array, $this->add_on_slug, $this->add_on_name);
             }else{
-                $sact = '<strong style="color:red;">Add-on is not yet activated!</strong>';
-                $sact .= '<br /><br />---';
-                $sact .= '<br /><br /><span class="button super-button activate-add-on">Activate</span>';
-                $sact .= '';
+                return $array;
             }
-            $new_activation_html = '';
-            $new_activation_html .= '<div class="super-field">';
-            $new_activation_html .= '<div class="super-field-info"></div>';
-            $new_activation_html .= '<div class="input"><strong>Super Forms - ' . $title . '</strong><br /><input type="text" name="license_' . $add_on . '" class="element-field" value="' . $settings['license_' . $add_on] . '" /></div>';
-            $new_activation_html .= '<input type="hidden" name="add_on" value="' . $add_on . '" />';
-            $new_activation_html .= '<div class="input add-on-activation-msg">' . $sact . $dact . '</div>';
-            $new_activation_html .= '</div>';
-            $array['activation']['html'][] = $new_activation_html;
-            return $array;
         }
 
 
@@ -470,15 +462,9 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          *  @since      1.0.0
          */
         public static function deactivate(){
-            $add_on = SUPER_Popup()->add_on_slug;
-            $settings = get_option( 'super_settings' );
-            if(isset($settings['license_' . $add_on])){
-                $license = $settings['license_' . $add_on];
-                $domain = $_SERVER['SERVER_NAME'];
-                $url = 'http://f4d.nl/super-forms/?api=license-deactivate-add-on&add-on=' . $add_on . '&key=' . $license . '&domain=' . $domain;
-                wp_remote_get( $url, array('timeout'=>60) );
+            if (method_exists('SUPER_Forms','add_on_activation_message')) {
+                SUPER_Forms::add_on_deactivate($this->add_on_slug);
             }
-            delete_option( 'sac_' . $add_on );
         }
 
 
@@ -488,31 +474,26 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          * @since       1.0.0
         */
         public function activation_message( $activation_msg, $data ) {
-            $form_id = absint($data['id']);
-            $settings = $data['settings'];
-            if( (isset($settings['popup_enabled'])) && ($settings['popup_enabled']=='true') ) {
+            if (method_exists('SUPER_Forms','add_on_activation_message')) {
+                $form_id = absint($data['id']);
+                $settings = $data['settings'];
+                if( (isset($settings['popup_enabled'])) && ($settings['popup_enabled']=='true') ) {
 
-                // Check if expiration is enabled and if cookie exists
-                if( ($settings['popup_expire_trigger']!='') && ($settings['popup_expire']>0) ) {
-                    if( isset($_COOKIE['super_popup_expire_' . $form_id]) ) {
-                        return $activation_msg;
+                    // Check if expiration is enabled and if cookie exists
+                    if( ($settings['popup_expire_trigger']!='') && ($settings['popup_expire']>0) ) {
+                        if( isset($_COOKIE['super_popup_expire_' . $form_id]) ) {
+                            return $activation_msg;
+                        }
+                    }
+
+                    // Generate popup HTML only if popup is enabled
+                    if( ( ($settings['popup_logged_in']=='true') && (is_user_logged_in()) ) || ( ($settings['popup_not_logged_in']=='true') && (!is_user_logged_in()) ) ) {
+                        return SUPER_Forms::add_on_activation_message($activation_msg, $this->add_on_slug, $this->add_on_name);
                     }
                 }
-
-                // Generate popup HTML only if popup is enabled
-                if( ( ($settings['popup_logged_in']=='true') && (is_user_logged_in()) ) || ( ($settings['popup_not_logged_in']=='true') && (!is_user_logged_in()) ) ) {
-                    $add_on = SUPER_Popup()->add_on_slug;
-                    $sac = get_option( 'sac_' . $add_on, 0 );
-                    if( $sac!=1 ) {
-                        $activation_msg .= '<div class="super-msg error"><h1>Please note:</h1>';
-                        $activation_msg .= __( 'You haven\'t activated your Super Forms - Popup Add-on yet', 'super-forms' ) . '<br />';
-                        $activation_msg .= __( 'Please click <a target="_blank" href="' . admin_url() . 'admin.php?page=super_settings#activate">here</a> and enter you Purchase Code under the Activation TAB.', 'super-forms' );
-                        $activation_msg .= '<span class="close"></span></div>';
-                        $activation_msg .= '</div>';
-                    }
-                }
+            }else{
+                return $activation_msg;
             }
-            return $activation_msg;
         }
 
 
