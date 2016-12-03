@@ -96,3 +96,9 @@ span.super-popup-close:active {
 	visibility:hidden!important;
 	height:0!important;
 }
+.super-popup-content .super-msg.success {
+	margin:25px;
+}
+.super-popup-content .super-msg.success .close {
+	display:none;
+}

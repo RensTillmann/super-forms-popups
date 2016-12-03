@@ -201,7 +201,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
         /**
          * Automatically update plugin from the repository
          *
-         *  @since      1.2.0
+         *  @since      1.0.0
         */
         function update_plugin() {
             require_once ( SUPER_PLUGIN_DIR . '/includes/admin/update-super-forms.php' );
@@ -624,10 +624,6 @@ if( !class_exists( 'SUPER_Popup' ) ) :
             }
             return $styles;
         }
-
-
-
-
 
 
         /**
