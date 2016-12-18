@@ -204,10 +204,12 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          *  @since      1.0.0
         */
         function update_plugin() {
-            require_once ( SUPER_PLUGIN_DIR . '/includes/admin/update-super-forms.php' );
-            $plugin_remote_path = 'http://f4d.nl/super-forms/';
-            $plugin_slug = plugin_basename( __FILE__ );
-            new SUPER_WP_AutoUpdate( $this->version, $plugin_remote_path, $plugin_slug, '', '', $this->add_on_slug );
+            if( defined('SUPER_PLUGIN_DIR') ) {
+                require_once ( SUPER_PLUGIN_DIR . '/includes/admin/update-super-forms.php' );
+                $plugin_remote_path = 'http://f4d.nl/super-forms/';
+                $plugin_slug = plugin_basename( __FILE__ );
+                new SUPER_WP_AutoUpdate( $this->version, $plugin_remote_path, $plugin_slug, '', '', $this->add_on_slug );
+            }
         }
 
 
@@ -436,6 +438,12 @@ if( !class_exists( 'SUPER_Popup' ) ) :
             $functions['after_preview_loaded_hook'][] = array(
                 'name' => 'init_show_preview_popup'
             );
+            $functions['before_scrolling_to_error_hook'][] = array(
+                'name' => 'init_before_scrolling_to_error_popup'
+            );
+            $functions['before_scrolling_to_message_hook'][] = array(
+                'name' => 'init_before_scrolling_to_message_popup'
+            );
             return $functions;
         }
 
@@ -446,7 +454,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          * @since       1.0.0
         */
         public function activation($array, $data) {
-            if (method_exists('SUPER_Forms','add_on_activation_message')) {
+            if (method_exists('SUPER_Forms','add_on_activation')) {
                 return SUPER_Forms::add_on_activation($array, $this->add_on_slug, $this->add_on_name);
             }else{
                 return $array;
@@ -462,7 +470,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          *  @since      1.0.0
          */
         public static function deactivate(){
-            if (method_exists('SUPER_Forms','add_on_activation_message')) {
+            if (method_exists('SUPER_Forms','add_on_deactivate')) {
                 SUPER_Forms::add_on_deactivate($this->add_on_slug);
             }
         }
