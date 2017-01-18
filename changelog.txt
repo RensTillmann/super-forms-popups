@@ -1,2 +1,5 @@
-Dec 22, 2016 - Version 1.0.0
+Jan 19, 2017 - Version 1.0.1
+- Fix: Popup overlay being above datepicker and timepicker
+
+Dec 23, 2016 - Version 1.0.0
 - Initial release!
