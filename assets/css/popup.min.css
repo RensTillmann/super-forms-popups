@@ -37,6 +37,7 @@
 	box-sizing: border-box;
 	float: left;
 	position: relative;
+	z-index: 1;
 }
 .super-first-responsiveness .super-popup-content,
 .super-second-responsiveness .super-popup-content {overflow-y: auto;}
@@ -49,7 +50,7 @@
 	position: absolute;
 	right: 0px;
 	top: 0px;
-	z-index: 1;
+	z-index: 2;
 }
 .super-popup > .super-popup-close > .super-popup-close-label {
 	display: inline-block;
