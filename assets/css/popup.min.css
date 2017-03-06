@@ -38,6 +38,7 @@
 	float: left;
 	position: relative;
 	z-index: 1;
+	overflow-y: auto;
 }
 .super-first-responsiveness .super-popup-content,
 .super-second-responsiveness .super-popup-content {overflow-y: auto;}

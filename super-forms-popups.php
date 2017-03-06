@@ -10,7 +10,7 @@
  * Plugin Name: Super Forms - Popups
  * Plugin URI:  http://codecanyon.net/item/super-forms-drag-drop-form-builder/13979866
  * Description: Create fully customizable popups for Super Forms
- * Version:     1.1.0
+ * Version:     1.2.0
  * Author:      feeling4design
  * Author URI:  http://codecanyon.net/user/feeling4design
 */
@@ -36,7 +36,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          *
          *  @since      1.0.0
         */
-        public $version = '1.1.0';
+        public $version = '1.2.0';
 
 
         /**
@@ -499,9 +499,8 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         return SUPER_Forms::add_on_activation_message($activation_msg, $this->add_on_slug, $this->add_on_name);
                     }
                 }
-            }else{
-                return $activation_msg;
             }
+            return $activation_msg;
         }
 
 
@@ -741,6 +740,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
         function register_popup_settigs( $array, $settings ) {
 
             $array['popup_settings'] = array(        
+                'hidden' => 'settings',
                 'name' => __( 'Popup Settings', 'super-forms' ),
                 'label' => __( 'Popup Settings', 'super-forms' ),
                 'fields' => array(

@@ -1,3 +1,7 @@
+Mar 06, 2017 - Version 1.2.0
+- only show settings on form builder page
+- use overflow-y: auto on popup content
+
 Feb 03, 2017 - Version 1.1.0
 - Fix: Popup overlay being above datepicker and timepicker
 - Fix: Popup closes when date or time is selected/clicked
