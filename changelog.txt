@@ -1,3 +1,6 @@
+May 18, 2017 - Version 1.2.1
+- Fix: Issue with z-index when reCAPTCHA is being used and user must do a puzzle
+
 Mar 06, 2017 - Version 1.2.0
 - only show settings on form builder page
 - use overflow-y: auto on popup content
