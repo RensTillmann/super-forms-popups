@@ -222,6 +222,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                 echo '</div>';
             }
         }
+        
 
         /**
          * Automatically update plugin from the repository
