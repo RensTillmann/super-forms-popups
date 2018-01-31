@@ -1,3 +1,7 @@
+Jan 31, 2017 - Version 1.3.0
+- Fix: Replaced andSelf() by addBack() which should be used with jQuery 1.8 and later.
+- Fix: Check if variable is string before using parseJSON()
+
 Nov 16, 2017 - Version 1.2.1
 - Fix: Issue with z-index when reCAPTCHA is being used and user must do a puzzle
 
