@@ -10,7 +10,7 @@
  * Plugin Name: Super Forms - Popups
  * Plugin URI:  http://codecanyon.net/item/super-forms-drag-drop-form-builder/13979866
  * Description: Create fully customizable popups for Super Forms
- * Version:     1.3.0
+ * Version:     1.3.1
  * Author:      feeling4design
  * Author URI:  http://codecanyon.net/user/feeling4design
 */
@@ -36,7 +36,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          *
          *  @since      1.0.0
         */
-        public $version = '1.3.0';
+        public $version = '1.3.1';
 
 
         /**
@@ -787,6 +787,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         ),
                         'parent' => 'popup_enabled',
                         'filter_value' => 'true',
+                        'allow_empty' => true,
                     ),
                     'popup_not_logged_in' => array(
                         'default' => SUPER_Settings::get_value( 0, 'popup_not_logged_in', $settings['settings'], 'true' ),
@@ -797,6 +798,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         ),
                         'parent' => 'popup_enabled',
                         'filter_value' => 'true',
+                        'allow_empty' => true,
                     ),
                     'popup_page_load' => array(
                         'default' => SUPER_Settings::get_value( 0, 'popup_page_load', $settings['settings'], 'true' ),
@@ -807,6 +809,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         ),
                         'parent' => 'popup_enabled',
                         'filter_value' => 'true',
+                        'allow_empty' => true,
                     ),
                     'popup_exit_intent' => array(
                         'default' => SUPER_Settings::get_value( 0, 'popup_exit_intent', $settings['settings'], '' ),
@@ -834,6 +837,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'filter'=>true,
                         'parent' => 'popup_leave',
                         'filter_value' => 'true',
+                        'allow_empty' => true,
                     ),
                     'popup_enable_scrolling' => array(
                         'default' => SUPER_Settings::get_value( 0, 'popup_enable_scrolling', $settings['settings'], '' ),
@@ -940,6 +944,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         ),
                         'parent' => 'popup_enabled',
                         'filter_value' => 'true',
+                        'allow_empty' => true,
                     ),
                     'popup_close_btn_icon_color' => array(
                         'name' => __( 'Close button icon color', 'super-forms' ),
@@ -947,7 +952,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_icon_color', $settings['settings'], '#fff' ),
                         'filter'=>true,
                         'parent' => 'popup_close_btn',
-                        'filter_value' => 'true',  
+                        'filter_value' => 'true',
                     ),
                     'popup_close_btn_bg_color' => array(
                         'name' => __( 'Close button background color (leave blank for none)', 'super-forms' ),
@@ -955,7 +960,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_bg_color', $settings['settings'], '#00bc65' ),
                         'filter'=>true,
                         'parent' => 'popup_close_btn',
-                        'filter_value' => 'true',  
+                        'filter_value' => 'true',
                     ),
                     'popup_close_btn_label' => array(
                         'name' => __( 'Close button label text e.g: Close', 'super-forms' ),
@@ -963,7 +968,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_label', $settings['settings'], '' ),
                         'filter'=>true,
                         'parent' => 'popup_close_btn',
-                        'filter_value' => 'true',  
+                        'filter_value' => 'true',
                     ),
                     'popup_close_btn_label_color' => array(
                         'name' => __( 'Close button label color', 'super-forms' ),
@@ -971,7 +976,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_label_color', $settings['settings'], '#00bc65' ),
                         'filter'=>true,
                         'parent' => 'popup_close_btn',
-                        'filter_value' => 'true',  
+                        'filter_value' => 'true',
                     ),
                     'popup_close_btn_label_bg_color' => array(
                         'name' => __( 'Close button label bg color', 'super-forms' ),
@@ -979,7 +984,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'default' => SUPER_Settings::get_value( 0, 'popup_close_btn_label_bg_color', $settings['settings'], '#00bc65' ),
                         'filter'=>true,
                         'parent' => 'popup_close_btn',
-                        'filter_value' => 'true',  
+                        'filter_value' => 'true',
                     ),
                     'popup_close_btn_label_padding' => array(
                         'name' => __( 'Close button label paddings e.g: 0px 0px 0px 0px', 'super-forms' ),
@@ -1125,7 +1130,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'default' => SUPER_Settings::get_value( 0, 'popup_background_color', $settings['settings'], '#ffffff' ),
                         'filter'=>true,
                         'parent' => 'popup_enabled',
-                        'filter_value' => 'true',  
+                        'filter_value' => 'true',
                     ),
                     'popup_overlay_color' => array(
                         'name' => __( 'Body overlay color', 'super-forms' ),
@@ -1133,7 +1138,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'default' => SUPER_Settings::get_value( 0, 'popup_overlay_color', $settings['settings'], '#000000' ),
                         'filter'=>true,
                         'parent' => 'popup_enabled',
-                        'filter_value' => 'true',  
+                        'filter_value' => 'true',
                     ), 
                     'popup_overlay_opacity' => array(
                         'name' => __( 'Body overlay opacity', 'super-forms' ),
@@ -1152,7 +1157,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         'filter'=>true,
                         'default' => SUPER_Settings::get_value( 0, 'popup_background_image', $settings['settings'], '0' ),
                         'parent' => 'popup_enabled',
-                        'filter_value' => 'true', 
+                        'filter_value' => 'true',
                     ),
                     'popup_background_image_repeat' => array(
                         'name' => __( 'Background Image Repeat', 'super-forms' ),
