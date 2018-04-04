@@ -10,7 +10,7 @@
  * Plugin Name: Super Forms - Popups
  * Plugin URI:  http://codecanyon.net/item/super-forms-drag-drop-form-builder/13979866
  * Description: Create fully customizable popups for Super Forms
- * Version:     1.3.1
+ * Version:     1.3.2
  * Author:      feeling4design
  * Author URI:  http://codecanyon.net/user/feeling4design
 */
@@ -36,7 +36,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
          *
          *  @since      1.0.0
         */
-        public $version = '1.3.1';
+        public $version = '1.3.2';
 
 
         /**
@@ -596,7 +596,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         $styles .= 'background-image: none;';
                     }
                     // Popup border / radius
-                    if( $v['enable_borders']=='true') {
+                    if( !empty($v['enable_borders']) ) {
                         if( $v['border_size']>0 ) {
                             $styles .= 'border-width: ' . $v['border_size'] . 'px;';
                             $styles .= 'border-color: ' . $v['border_color'] . ';';
@@ -629,9 +629,9 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                         $styles .= 'background-color: ' . $v['close_btn_bg_color'] . ';';
                         $styles .= 'font-size: ' . $v['close_btn_icon_size'] . 'px;';
                         $styles .= 'border-width: ' . $v['close_btn_border'] . 'px;';
-                        $styles .= 'border-color: ' . $v['close_btn_border_color'] . ';';
+                        if(!empty($v['close_btn_border_color'])) $styles .= 'border-color: ' . $v['close_btn_border_color'] . ';';
                         $styles .= 'border-style: solid;';
-                        if( $v['close_btn_padding']!='' ) {
+                        if( !empty($v['close_btn_padding']) ) {
                             $styles .= 'padding: ' . $v['close_btn_padding'] . ';';
                         }
                         if( ($v['close_btn_radius']!='') && ($v['close_btn_radius']>0) ) {
@@ -647,7 +647,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                     $styles .= '}';
 
                     $styles .= $s.'.super-popup-close-label {';
-                        if( $v['close_btn_label_padding']!='' ) {
+                        if( !empty($v['close_btn_label_padding']) ) {
                             $styles .= 'padding: ' . $v['close_btn_label_padding'] . ';';
                         }
                         $styles .= 'color: ' . $v['close_btn_label_color'] . ';';
@@ -671,7 +671,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
             if( (isset($settings['popup_enabled'])) && ($settings['popup_enabled']=='true') ) {
 
                 // Check if expiration is enabled and if cookie exists
-                if( ($settings['popup_expire_trigger']!='') && ($settings['popup_expire']>0) ) {
+                if( (!empty($settings['popup_expire_trigger'])) && ($settings['popup_expire']>0) ) {
                     if( isset($_COOKIE['super_popup_expire_' . $form_id]) ) {
                         return '';
                     }
@@ -687,7 +687,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                             // Popup close button
                             if( $settings['popup_close_btn']=='true' ) {
                                 $result .= '<span class="super-popup-close">';
-                                if($settings['popup_close_btn_label']!='') $result .= '<span class="super-popup-close-label">' . $settings['popup_close_btn_label'] . '</span>';
+                                if( !empty($settings['popup_close_btn_label']) ) $result .= '<span class="super-popup-close-label">' . $settings['popup_close_btn_label'] . '</span>';
                                 $result .= '<span class="super-popup-close-icon"></span>';
                                 $result .= '</span>';    
                             }

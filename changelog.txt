@@ -1,3 +1,7 @@
+Apr 04, 2018 - Version 1.3.2
+- Fix: Responsiveness not correct after removing "overflow:hidden" style from wrapper element to allow overlapping content
+- Fix: Removed some PHP warnings regarding unset settings
+
 Feb 15, 2018 - Version 1.3.1
 - Fix: Allow settings to be empty for new Super Forms versions (values that can be left empty must not be overwritten by default value)
 
