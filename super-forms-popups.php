@@ -514,7 +514,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
                 if( (isset($settings['popup_enabled'])) && ($settings['popup_enabled']=='true') ) {
 
                     // Check if expiration is enabled and if cookie exists
-                    if( ($settings['popup_expire_trigger']!='') && ($settings['popup_expire']>0) ) {
+                    if( (!empty($settings['popup_expire_trigger'])) && ($settings['popup_expire']>0) ) {
                         if( isset($_COOKIE['super_popup_expire_' . $form_id]) ) {
                             return $activation_msg;
                         }
@@ -551,7 +551,7 @@ if( !class_exists( 'SUPER_Popup' ) ) :
         public static function set_popup_expire_cookie() {
             $form_id = absint($_POST['form_id']);
             if(!isset($_COOKIE['super_popup_expire_' . $form_id])) {
-                $expire = absint($_POST['expire']);
+                $expire = floatval($_POST['expire']);
                 if( $expire>0 ) {
                     setcookie( 'super_popup_expire_' . $form_id, $form_id, time() + ($expire * DAY_IN_SECONDS), COOKIEPATH, COOKIE_DOMAIN, is_ssl() );
                 }
